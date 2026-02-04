@@ -1,0 +1,18 @@
+{
+  "name": "agent-a2a-marketplace",
+  "version": "1.0.0",
+  "description": "Agent2Agent Marketplace - Smart Contract + REST API",
+  "main": "api/server.js",
+  "scripts": {
+    "install": "cd api && npm install",
+    "start": "cd api && npm start",
+    "dev": "cd api && npm run dev"
+  },
+  "keywords": ["agent", "marketplace", "a2a", "web3", "usdc", "blockchain"],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
