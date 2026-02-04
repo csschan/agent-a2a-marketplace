@@ -1,7 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const { ethers } = require('ethers');
-require('dotenv').config();
+
+// Load .env only if it exists (for local development)
+try {
+  require('dotenv').config();
+} catch (e) {
+  // In production (Railway), env vars are already set
+  console.log('No .env file found, using system environment variables');
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
