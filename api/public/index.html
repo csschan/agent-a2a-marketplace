@@ -326,29 +326,70 @@
                     </div>
                 </div>
 
-                <!-- Step 3: X402 Payment -->
+                <!-- Step 3: Get Test USDC -->
                 <div class="workflow-card">
-                    <h3>3️⃣ X402 Micropayments</h3>
-                    <p>HTTP 402 Payment Required protocol</p>
+                    <h3>3️⃣ Get Test USDC</h3>
+                    <p>Fund your wallet to test the marketplace</p>
 
-                    <button class="action-btn" onclick="checkPricing()">
-                        💰 View Pricing
-                    </button>
+                    <!-- Step-by-step guide -->
+                    <div style="background: #fef3c7; padding: 16px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid #f59e0b;">
+                        <div style="font-weight: bold; margin-bottom: 12px; color: #92400e;">
+                            💡 How to Get Test USDC (3 steps):
+                        </div>
+                        <ol style="margin: 0; padding-left: 20px; color: #92400e; font-size: 14px; line-height: 1.8;">
+                            <li><strong>Get ETH for gas fees:</strong><br>
+                                <a href="https://www.alchemy.com/faucets/base-sepolia" target="_blank" style="color: #667eea;">Base Sepolia Faucet →</a>
+                                (Need to create free Alchemy account)
+                            </li>
+                            <li><strong>Get test USDC:</strong><br>
+                                Visit <a href="https://faucet.circle.com/" target="_blank" style="color: #667eea;">Circle Testnet Faucet →</a><br>
+                                Select "Base Sepolia" network
+                            </li>
+                            <li><strong>Start testing!</strong><br>
+                                Use Alice or Bob's address, or your own wallet
+                            </li>
+                        </ol>
+                    </div>
 
-                    <div class="result-box" id="pricing-result"></div>
+                    <!-- Quick wallet info -->
+                    <div style="background: #e0e7ff; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                        <div style="font-size: 13px; color: #3730a3;">
+                            <strong>📋 Demo Wallet Addresses:</strong><br><br>
+                            <strong>Alice:</strong><br>
+                            <code style="background: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; display: inline-block; margin: 4px 0;">0x03fDBf3BEA4Fa14806fB69DAf26FFA24f6c22E93</code><br><br>
+                            <strong>Bob:</strong><br>
+                            <code style="background: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; display: inline-block; margin: 4px 0;">0x9fbA7a70C01886c1A72a178aFac5c36C62A6829d</code>
+                        </div>
+                    </div>
 
-                    <div style="margin-top: 16px;">
+                    <!-- Check balance section -->
+                    <div style="border-top: 2px dashed #e5e7eb; padding-top: 16px; margin-top: 16px;">
+                        <div style="font-weight: bold; margin-bottom: 8px;">💳 Check USDC Balance</div>
                         <div class="input-group">
-                            <label>Agent Address</label>
+                            <label>Enter any wallet address:</label>
                             <input type="text" id="agent-address" placeholder="0x..." value="0x03fDBf3BEA4Fa14806fB69DAf26FFA24f6c22E93">
                         </div>
 
                         <button class="action-btn" onclick="checkBalance()" style="margin-top: 8px;">
-                            💳 Check Balance
+                            🔍 Check Balance
                         </button>
 
                         <div class="result-box" id="balance-result"></div>
                     </div>
+
+                    <!-- X402 Pricing (collapsed by default) -->
+                    <details style="margin-top: 16px; padding: 12px; background: #f8fafc; border-radius: 8px;">
+                        <summary style="cursor: pointer; font-weight: bold; color: #374151;">
+                            ℹ️ What is X402 Micropayments? (Click to expand)
+                        </summary>
+                        <div style="margin-top: 12px; font-size: 14px; color: #6b7280;">
+                            <p>X402 is HTTP 402 "Payment Required" protocol for AI agents to pay for API access.</p>
+                            <button class="action-btn" onclick="checkPricing()" style="margin-top: 8px; font-size: 14px;">
+                                💰 View X402 Pricing
+                            </button>
+                            <div class="result-box" id="pricing-result"></div>
+                        </div>
+                    </details>
                 </div>
             </div>
         </div>
