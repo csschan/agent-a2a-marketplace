@@ -487,6 +487,18 @@
                         `;
                     } else if (task.status === 'Submitted') {
                         actionButton = `<button class="action-btn" onclick="completeTask(${task.id})" style="margin-top: 12px; background: #10b981;">👩‍💼 Alice: Complete & Pay</button>`;
+                    } else if (task.status === 'Completed') {
+                        actionButton = `
+                            <div style="margin-top: 12px; padding: 16px; background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-radius: 8px; border: 2px solid #10b981;">
+                                <div style="font-size: 18px; font-weight: bold; color: #065f46; margin-bottom: 8px;">
+                                    ✅ Task Completed!
+                                </div>
+                                <div style="font-size: 14px; color: #047857;">
+                                    👩‍💼 Alice completed the task and released payment to Bob<br>
+                                    💰 Payment: ${task.reward} USDC transferred to worker
+                                </div>
+                            </div>
+                        `;
                     }
 
                     return `
