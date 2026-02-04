@@ -27,16 +27,6 @@ app.use((req, res, next) => {
 });
 
 // Contract configuration
-console.log('🔍 DEBUG: Checking environment variables...');
-console.log('Environment keys:', Object.keys(process.env).filter(k =>
-  k.includes('MARKET') || k.includes('USDC') || k.includes('PRIVATE') || k.includes('RPC') || k.includes('SEPOLIA')
-));
-console.log('MARKETPLACE_ADDRESS exists:', !!process.env.MARKETPLACE_ADDRESS);
-console.log('USDC_ADDRESS exists:', !!process.env.USDC_ADDRESS);
-console.log('BASE_SEPOLIA_RPC_URL exists:', !!process.env.BASE_SEPOLIA_RPC_URL);
-console.log('PRIVATE_KEY exists:', !!process.env.PRIVATE_KEY);
-console.log('PRIVATE_KEY length:', process.env.PRIVATE_KEY?.length || 0);
-
 const MARKETPLACE_ADDRESS = process.env.MARKETPLACE_ADDRESS || "0x833F8f973786c040698509F203866029026CEfF6";
 const USDC_ADDRESS = process.env.USDC_ADDRESS || "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
 const RPC_URL = process.env.BASE_SEPOLIA_RPC_URL || "https://sepolia.base.org";
@@ -45,8 +35,7 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 // Check for required environment variables
 if (!PRIVATE_KEY) {
   console.error('❌ ERROR: PRIVATE_KEY environment variable is not set!');
-  console.error('Please set PRIVATE_KEY in Railway environment variables.');
-  console.error('Available env vars:', Object.keys(process.env).filter(k => !k.includes('PATH')).slice(0, 20));
+  console.error('Please set PRIVATE_KEY in environment variables.');
   process.exit(1);
 }
 
