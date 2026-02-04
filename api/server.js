@@ -598,12 +598,13 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 A2A Marketplace API running on port ${PORT}`);
   console.log(`📝 Network: Base Sepolia`);
   console.log(`📄 Marketplace: ${MARKETPLACE_ADDRESS}`);
   console.log(`💰 USDC: ${USDC_ADDRESS}`);
   console.log(`👤 Wallet: ${wallet.address}`);
+  console.log(`🌐 Listening on 0.0.0.0:${PORT}`);
   console.log(`\n📚 API Documentation:`);
   console.log(`   GET  /health - Health check`);
   console.log(`   GET  /api/info - Contract info`);
@@ -617,4 +618,13 @@ app.listen(PORT, () => {
   console.log(`   POST /api/tasks/:id/cancel - Cancel task`);
   console.log(`   GET  /api/agent/:address/earnings - Get agent earnings`);
   console.log(`   GET  /api/wallet - Get wallet info`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully...');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
 });
