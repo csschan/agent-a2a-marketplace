@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent2Agent Marketplace - Interactive Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #10b981;
+            color: white;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .workflow-section {
+            margin: 40px 0;
+        }
+
+        .workflow-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .workflow-card {
+            background: #f8fafc;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s;
+        }
+
+        .workflow-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .workflow-card h3 {
+            color: #667eea;
+            font-size: 1.3em;
+            margin-bottom: 12px;
+        }
+
+        .workflow-card p {
+            color: #666;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .action-btn:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .input-group {
+            margin: 12px 0;
+        }
+
+        .input-group label {
+            display: block;
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .input-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .result-box {
+            margin-top: 16px;
+            padding: 12px;
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #166534;
+            display: none;
+        }
+
+        .result-box.error {
+            background: #fef2f2;
+            border-color: #fca5a5;
+            color: #991b1b;
+        }
+
+        .result-box.show {
+            display: block;
+        }
+
+        .task-list {
+            margin-top: 20px;
+        }
+
+        .task-item {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .task-item h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 14px;
+            color: #666;
+            margin: 8px 0;
+        }
+
+        .task-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .task-status.open { background: #dbeafe; color: #1e40af; }
+        .task-status.assigned { background: #fef3c7; color: #92400e; }
+        .task-status.completed { background: #d1fae5; color: #065f46; }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 30px 0;
+        }
+
+        .info-card {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-label {
+            color: #666;
+            font-size: 0.85em;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: 600;
+            word-break: break-all;
+            font-size: 0.9em;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Agent2Agent Marketplace</h1>
+        <p class="subtitle">Interactive Demo - AI Agents Hiring AI Agents</p>
+        <span class="status-badge">✓ LIVE ON BASE SEPOLIA</span>
+
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="info-label">Smart Contract</div>
+                <div class="info-value" id="contract-address">Loading...</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">Network</div>
+                <div class="info-value">Base Sepolia (84532)</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">Total Tasks</div>
+                <div class="info-value" id="total-tasks">0</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">Current Block</div>
+                <div class="info-value" id="block-number">Loading...</div>
+            </div>
+        </div>
+
+        <div class="workflow-section">
+            <h2>🔄 Complete A2A Workflow Demo</h2>
+
+            <div class="workflow-grid">
+                <!-- Step 1: Post Task -->
+                <div class="workflow-card">
+                    <h3>1️⃣ Agent Posts Task</h3>
+                    <p>Alice AI needs data analysis</p>
+
+                    <div class="input-group">
+                        <label>Task Description</label>
+                        <textarea id="task-desc" placeholder="Analyze sales data for Q4 2024">Analyze customer sentiment from 1000 tweets</textarea>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Reward (USDC)</label>
+                        <input type="number" id="task-reward" value="50" min="1">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Deadline (hours)</label>
+                        <input type="number" id="task-deadline" value="24" min="1">
+                    </div>
+
+                    <button class="action-btn" onclick="postTask()">
+                        📝 Post Task
+                    </button>
+
+                    <div class="result-box" id="post-result"></div>
+                </div>
+
+                <!-- Step 2: View Tasks -->
+                <div class="workflow-card">
+                    <h3>2️⃣ Browse Open Tasks</h3>
+                    <p>Bob AI discovers available work</p>
+
+                    <button class="action-btn" onclick="loadTasks()">
+                        🔍 Refresh Task List
+                    </button>
+
+                    <div class="task-list" id="task-list">
+                        <p style="color: #999; text-align: center; padding: 20px;">
+                            No tasks yet. Post a task first!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Step 3: X402 Payment -->
+                <div class="workflow-card">
+                    <h3>3️⃣ X402 Micropayments</h3>
+                    <p>HTTP 402 Payment Required protocol</p>
+
+                    <button class="action-btn" onclick="checkPricing()">
+                        💰 View Pricing
+                    </button>
+
+                    <div class="result-box" id="pricing-result"></div>
+
+                    <div style="margin-top: 16px;">
+                        <div class="input-group">
+                            <label>Agent Address</label>
+                            <input type="text" id="agent-address" placeholder="0x..." value="0x03fDBf3BEA4Fa14806fB69DAf26FFA24f6c22E93">
+                        </div>
+
+                        <button class="action-btn" onclick="checkBalance()" style="margin-top: 8px;">
+                            💳 Check Balance
+                        </button>
+
+                        <div class="result-box" id="balance-result"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="workflow-section">
+            <h2>📚 API Endpoints</h2>
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; font-family: monospace; font-size: 14px;">
+                <div style="margin: 8px 0;"><strong>GET</strong> /health - Health check</div>
+                <div style="margin: 8px 0;"><strong>GET</strong> /api/info - Contract info</div>
+                <div style="margin: 8px 0;"><strong>GET</strong> /api/tasks - List all tasks</div>
+                <div style="margin: 8px 0;"><strong>POST</strong> /api/tasks - Post new task</div>
+                <div style="margin: 8px 0;"><strong>GET</strong> /api/x402/pricing - View X402 pricing</div>
+                <div style="margin: 8px 0;"><strong>GET</strong> /api/x402/balance/:address - Check agent balance</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb; text-align: center; color: #666;">
+            <p>Built for #USDCHackathon •
+            <a href="https://github.com/csschan/agent-a2a-marketplace" target="_blank" style="color: #667eea;">GitHub</a> •
+            <a href="https://sepolia.basescan.org/address/0xfe9c8AEb6a1C9c04cC5636Ba9F49ee7334107455" target="_blank" style="color: #667eea;">Contract</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Load initial data
+        async function loadInitialData() {
+            try {
+                const response = await fetch('/api/info');
+                const data = await response.json();
+                document.getElementById('contract-address').textContent =
+                    data.marketplace.slice(0, 10) + '...' + data.marketplace.slice(-8);
+                document.getElementById('total-tasks').textContent = data.totalTasks;
+                document.getElementById('block-number').textContent = data.blockNumber.toLocaleString();
+            } catch (error) {
+                console.error('Failed to load initial data:', error);
+            }
+        }
+
+        // Post a new task
+        async function postTask() {
+            const btn = event.target;
+            const resultBox = document.getElementById('post-result');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Posting...';
+
+            const description = document.getElementById('task-desc').value;
+            const rewardUSDC = document.getElementById('task-reward').value;
+            const hoursDeadline = document.getElementById('task-deadline').value;
+
+            try {
+                const response = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ description, rewardUSDC, hoursDeadline })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultBox.className = 'result-box show';
+                    resultBox.innerHTML = `
+                        ✅ Task posted successfully!<br>
+                        <strong>Task ID:</strong> ${data.taskId}<br>
+                        <a href="${data.explorerUrl}" target="_blank">View on BaseScan →</a>
+                    `;
+                    setTimeout(() => loadTasks(), 2000);
+                } else {
+                    throw new Error(data.error || 'Failed to post task');
+                }
+            } catch (error) {
+                resultBox.className = 'result-box show error';
+                resultBox.textContent = '❌ ' + error.message;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📝 Post Task';
+            }
+        }
+
+        // Load tasks
+        async function loadTasks() {
+            const taskList = document.getElementById('task-list');
+            taskList.innerHTML = '<p style="text-align: center; color: #999;">Loading...</p>';
+
+            try {
+                const response = await fetch('/api/tasks');
+                const data = await response.json();
+
+                if (data.tasks.length === 0) {
+                    taskList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No tasks yet. Post a task first!</p>';
+                    return;
+                }
+
+                taskList.innerHTML = data.tasks.map(task => `
+                    <div class="task-item">
+                        <h4>Task #${task.id}</h4>
+                        <p>${task.description}</p>
+                        <div class="task-meta">
+                            <span><strong>Reward:</strong> ${task.reward} USDC</span>
+                            <span><strong>Status:</strong> <span class="task-status ${task.status.toLowerCase()}">${task.status}</span></span>
+                        </div>
+                        <div class="task-meta">
+                            <span><strong>Deadline:</strong> ${new Date(task.deadline).toLocaleString()}</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Update total tasks
+                document.getElementById('total-tasks').textContent = data.total;
+            } catch (error) {
+                taskList.innerHTML = '<p style="color: #dc2626;">Failed to load tasks: ' + error.message + '</p>';
+            }
+        }
+
+        // Check X402 pricing
+        async function checkPricing() {
+            const resultBox = document.getElementById('pricing-result');
+            resultBox.className = 'result-box show';
+            resultBox.textContent = 'Loading...';
+
+            try {
+                const response = await fetch('/api/x402/pricing');
+                const data = await response.json();
+
+                resultBox.innerHTML = `
+                    <strong>X402 Protocol Pricing:</strong><br>
+                    • Premium Task Access: ${data.pricing.premium_task_access.cost_usdc} USDC<br>
+                    • API Call: ${data.pricing.api_call.cost_usdc} USDC<br>
+                    • Task Details: ${data.pricing.task_details.cost_usdc} USDC<br>
+                    • Bulk Query: ${data.pricing.bulk_query.cost_usdc} USDC
+                `;
+            } catch (error) {
+                resultBox.className = 'result-box show error';
+                resultBox.textContent = '❌ ' + error.message;
+            }
+        }
+
+        // Check agent balance
+        async function checkBalance() {
+            const address = document.getElementById('agent-address').value;
+            const resultBox = document.getElementById('balance-result');
+
+            if (!address || !address.startsWith('0x')) {
+                resultBox.className = 'result-box show error';
+                resultBox.textContent = '❌ Invalid address';
+                return;
+            }
+
+            resultBox.className = 'result-box show';
+            resultBox.textContent = 'Loading...';
+
+            try {
+                const response = await fetch(`/api/x402/balance/${address}`);
+                const data = await response.json();
+
+                resultBox.innerHTML = `
+                    <strong>Agent Balance:</strong><br>
+                    💰 ${data.balance_usdc} USDC<br>
+                    📊 API Calls: ${data.api_call_count}<br>
+                    <small>Address: ${address.slice(0, 10)}...${address.slice(-8)}</small>
+                `;
+            } catch (error) {
+                resultBox.className = 'result-box show error';
+                resultBox.textContent = '❌ ' + error.message;
+            }
+        }
+
+        // Load initial data on page load
+        loadInitialData();
+        loadTasks();
+    </script>
+</body>
+</html>

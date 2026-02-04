@@ -20,6 +20,9 @@ app.set('trust proxy', true);
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from public directory
+app.use(express.static('public'));
+
 // Request logging middleware (for debugging)
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} - ${req.ip}`);
