@@ -448,15 +448,30 @@ app.post('/api/tasks', async (req, res) => {
     const reward = ethers.parseUnits(rewardUSDC.toString(), 6);
     const deadline = Math.floor(Date.now() / 1000) + (hoursDeadline || 24) * 3600;
 
-    // Approve USDC first
-    console.log('Approving USDC...');
-    const approveTx = await usdc.approve(MARKETPLACE_ADDRESS, reward);
-    await approveTx.wait();
+    // Check current allowance
+    console.log('Checking USDC allowance...');
+    const currentAllowance = await usdc.allowance(wallet.address, MARKETPLACE_ADDRESS);
+    console.log('Current allowance:', ethers.formatUnits(currentAllowance, 6), 'USDC');
+    console.log('Required:', ethers.formatUnits(reward, 6), 'USDC');
+
+    // If allowance is insufficient, approve a large amount (1000 USDC)
+    if (currentAllowance < reward) {
+      console.log('Approving USDC...');
+      const approveAmount = ethers.parseUnits("1000", 6); // Approve 1000 USDC at once
+      const approveTx = await usdc.approve(MARKETPLACE_ADDRESS, approveAmount);
+      console.log('Waiting for approval confirmation...');
+      await approveTx.wait();
+      console.log('✅ USDC approved');
+    } else {
+      console.log('✅ Sufficient allowance already exists');
+    }
 
     // Post task
     console.log('Posting task...');
     const tx = await marketplace.postTask(description, reward, deadline);
+    console.log('Waiting for task confirmation...');
     const receipt = await tx.wait();
+    console.log('✅ Task posted');
 
     // Get task ID from event
     const event = receipt.logs.find(log => {
