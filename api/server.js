@@ -381,11 +381,11 @@ app.get('/api/tasks', async (req, res) => {
 
     for (let i = 1; i <= totalTasks; i++) {
       try {
-        const task = await marketplace.tasks(i);
+        const task = await marketplace.getTask(i);
         tasks.push({
-          id: i,
+          id: Number(task.id),
           poster: task.poster,
-          worker: task.worker === ethers.ZeroAddress ? null : task.worker,
+          worker: task.assignedTo === ethers.ZeroAddress ? null : task.assignedTo,
           description: task.description,
           reward: ethers.formatUnits(task.reward, 6),
           deadline: new Date(Number(task.deadline) * 1000).toISOString(),
@@ -410,12 +410,12 @@ app.get('/api/tasks', async (req, res) => {
 app.get('/api/tasks/:id', async (req, res) => {
   try {
     const taskId = parseInt(req.params.id);
-    const task = await marketplace.tasks(taskId);
+    const task = await marketplace.getTask(taskId);
 
     res.json({
-      id: taskId,
+      id: Number(task.id),
       poster: task.poster,
-      worker: task.worker === ethers.ZeroAddress ? null : task.worker,
+      worker: task.assignedTo === ethers.ZeroAddress ? null : task.assignedTo,
       description: task.description,
       reward: ethers.formatUnits(task.reward, 6),
       deadline: new Date(Number(task.deadline) * 1000).toISOString(),
@@ -435,10 +435,10 @@ app.get('/api/tasks/status/open', async (req, res) => {
 
     for (let i = 1; i <= totalTasks; i++) {
       try {
-        const task = await marketplace.tasks(i);
+        const task = await marketplace.getTask(i);
         if (task.status === 0) { // Open
           openTasks.push({
-            id: i,
+            id: Number(task.id),
             poster: task.poster,
             description: task.description,
             reward: ethers.formatUnits(task.reward, 6),
