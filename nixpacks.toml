@@ -5,4 +5,4 @@ nixPkgs = ['nodejs_20']
 cmds = ['cd api && npm ci --omit=dev']
 
 [start]
-cmd = 'cd api && npm start'
+cmd = 'cd api && PORT=${PORT:-8080} node server.js'
