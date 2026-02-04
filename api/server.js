@@ -17,6 +17,12 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Request logging middleware (for debugging)
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} - ${req.ip}`);
+  next();
+});
+
 // Contract configuration
 const MARKETPLACE_ADDRESS = process.env.MARKETPLACE_ADDRESS || "0x833F8f973786c040698509F203866029026CEfF6";
 const USDC_ADDRESS = process.env.USDC_ADDRESS || "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
@@ -88,6 +94,11 @@ const usdc = new ethers.Contract(USDC_ADDRESS, USDC_ABI, wallet);
 const TaskStatus = ["Open", "Assigned", "Submitted", "Completed", "Cancelled"];
 
 // Routes
+
+// Simple ping endpoint (no dependencies)
+app.get('/ping', (req, res) => {
+  res.json({ pong: true, timestamp: Date.now() });
+});
 
 // Welcome page
 app.get('/', (req, res) => {
