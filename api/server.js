@@ -595,13 +595,29 @@ app.get('/api/wallet', async (req, res) => {
   }
 });
 
+// ============ X402 Payment Protocol Integration ============
+try {
+  const X402Middleware = require('./x402-middleware');
+  const createX402Routes = require('./x402-routes');
+
+  const x402Middleware = new X402Middleware(marketplace, usdc);
+  const x402Routes = createX402Routes(marketplace, usdc, x402Middleware);
+
+  app.use('/api/x402', x402Routes);
+
+  console.log('✅ X402 Payment Protocol enabled');
+} catch (error) {
+  console.error('⚠️  X402 initialization failed:', error.message);
+  console.error('   Server will run without X402 support');
+}
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-// Start server FIRST (before X402 initialization for faster startup)
+// Start server
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 A2A Marketplace API running on port ${PORT}`);
   console.log(`📝 Network: Base Sepolia`);
@@ -609,28 +625,9 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`💰 USDC: ${USDC_ADDRESS}`);
   console.log(`👤 Wallet: ${wallet.address}`);
   console.log(`🌐 Listening on 0.0.0.0:${PORT}`);
-
-  // Initialize X402 after server is listening
-  try {
-    const X402Middleware = require('./x402-middleware');
-    const createX402Routes = require('./x402-routes');
-
-    const x402Middleware = new X402Middleware(marketplace, usdc);
-    const x402Routes = createX402Routes(marketplace, usdc, x402Middleware);
-
-    app.use('/api/x402', x402Routes);
-
-    console.log('✅ X402 Payment Protocol enabled');
-    console.log('   📍 /api/x402/pricing - View pricing');
-    console.log('   📍 /api/x402/balance/:address - Check balance');
-    console.log('   📍 /api/x402/tasks/:id/premium - Premium task access');
-  } catch (error) {
-    console.error('⚠️  X402 initialization failed:', error.message);
-    console.error('   Server will run without X402 support');
-  }
-
   console.log(`\n📚 API Documentation:`);
   console.log(`   GET  /health - Health check`);
+  console.log(`   GET  /ping - Simple ping test`);
   console.log(`   GET  /api/info - Contract info`);
   console.log(`   GET  /api/tasks - List all tasks`);
   console.log(`   GET  /api/tasks/:id - Get specific task`);
@@ -642,6 +639,11 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`   POST /api/tasks/:id/cancel - Cancel task`);
   console.log(`   GET  /api/agent/:address/earnings - Get agent earnings`);
   console.log(`   GET  /api/wallet - Get wallet info`);
+  if (app._router.stack.some(r => r.regexp && r.regexp.test('/api/x402'))) {
+    console.log(`   📍 /api/x402/pricing - View pricing`);
+    console.log(`   📍 /api/x402/balance/:address - Check balance`);
+    console.log(`   📍 /api/x402/tasks/:id/premium - Premium task access`);
+  }
 });
 
 // Graceful shutdown
