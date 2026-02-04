@@ -480,9 +480,16 @@
                         actionButton = `<button class="action-btn" onclick="acceptTask(${task.id})" style="margin-top: 12px;">👷 Bob: Accept Task</button>`;
                     } else if (task.status === 'Assigned') {
                         actionButton = `
-                            <div style="margin-top: 12px;">
-                                <input type="text" id="proof-${task.id}" placeholder="Enter proof URL (e.g. https://...)" style="width: 100%; padding: 8px; margin-bottom: 8px; border: 2px solid #e5e7eb; border-radius: 6px;">
-                                <button class="action-btn" onclick="submitProof(${task.id})">👷 Bob: Submit Proof</button>
+                            <div style="margin-top: 12px; padding: 12px; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                                <div style="margin-bottom: 8px; font-size: 14px; color: #92400e;">
+                                    📝 <strong>Bob needs to submit proof of work</strong><br>
+                                    <span style="font-size: 13px;">Enter a URL to evidence that shows the work is completed (e.g., report link, screenshot, data file)</span>
+                                </div>
+                                <input type="text" id="proof-${task.id}"
+                                    placeholder="https://example.com/completed-analysis.pdf"
+                                    value="https://example.com/sentiment-analysis-report.json"
+                                    style="width: 100%; padding: 10px; margin-bottom: 8px; border: 2px solid #f59e0b; border-radius: 6px; font-family: monospace; font-size: 13px;">
+                                <button class="action-btn" onclick="submitProof(${task.id})" style="background: #f59e0b;">👷 Bob: Submit Proof</button>
                             </div>
                         `;
                     } else if (task.status === 'Submitted') {
