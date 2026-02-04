@@ -42,7 +42,7 @@ try {
   process.exit(1);
 }
 
-// Contract ABIs (minimal)
+// Contract ABIs (with x402 support)
 const MARKETPLACE_ABI = [
   "function taskCounter() view returns (uint256)",
   "function tasks(uint256) view returns (address poster, address worker, string description, uint256 reward, uint256 deadline, uint8 status, string proofURI)",
@@ -52,11 +52,25 @@ const MARKETPLACE_ABI = [
   "function completeTask(uint256 taskId)",
   "function cancelTask(uint256 taskId)",
   "function agentEarnings(address agent) view returns (uint256)",
+  "function getTask(uint256 taskId) view returns (tuple(uint256 id, address poster, address assignedTo, string description, uint256 reward, uint8 status, string proofURI, uint256 createdAt, uint256 deadline))",
+  "function getAgentStats(address agent) view returns (uint256 totalEarnings, uint256 tasksCompleted)",
+  "function agentBalances(address) view returns (uint256)",
+  "function depositBalance(uint256 amount)",
+  "function withdrawBalance(uint256 amount)",
+  "function purchaseTaskAccess(uint256 taskId)",
+  "function chargeApiCall(address agent, uint256 cost)",
+  "function checkTaskAccess(uint256 taskId, address agent) view returns (bool)",
+  "function getBalance(address agent) view returns (uint256)",
+  "function defaultAccessFee() view returns (uint256)",
+  "function apiCallCost() view returns (uint256)",
+  "function apiCallCount(address) view returns (uint256)",
   "event TaskPosted(uint256 indexed taskId, address indexed poster, uint256 reward)",
   "event TaskAccepted(uint256 indexed taskId, address indexed worker)",
   "event TaskSubmitted(uint256 indexed taskId, string proofURI)",
   "event TaskCompleted(uint256 indexed taskId, address indexed worker, uint256 payout)",
-  "event TaskCancelled(uint256 indexed taskId)"
+  "event TaskCancelled(uint256 indexed taskId)",
+  "event BalanceDeposited(address indexed agent, uint256 amount, uint256 newBalance)",
+  "event AccessPurchased(uint256 indexed taskId, address indexed agent, uint256 fee)"
 ];
 
 const USDC_ABI = [
@@ -559,6 +573,23 @@ app.get('/api/wallet', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+// ============ X402 Payment Protocol Integration ============
+
+const X402Middleware = require('./x402-middleware');
+const createX402Routes = require('./x402-routes');
+
+// Initialize x402 system
+const x402Middleware = new X402Middleware(marketplace, usdc);
+const x402Routes = createX402Routes(marketplace, usdc, x402Middleware);
+
+// Mount x402 routes
+app.use('/api/x402', x402Routes);
+
+console.log('✅ X402 Payment Protocol enabled');
+console.log('   📍 /api/x402/pricing - View pricing');
+console.log('   📍 /api/x402/balance/:address - Check balance');
+console.log('   📍 /api/x402/tasks/:id/premium - Premium task access');
 
 // Error handling middleware
 app.use((err, req, res, next) => {

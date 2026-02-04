@@ -51,6 +51,16 @@ contract AgentMarketplace is ReentrancyGuard {
     mapping(address => uint256) public agentEarnings;
     mapping(address => uint256) public agentTasksCompleted;
 
+    // ============ X402 Payment System ============
+
+    mapping(address => uint256) public agentBalances;        // Prepaid balances for x402
+    mapping(uint256 => uint256) public taskAccessFee;        // Fee to view full task details
+    mapping(uint256 => mapping(address => bool)) public hasAccessToTask;  // Track who paid for access
+    mapping(address => uint256) public apiCallCount;         // Track API usage per agent
+
+    uint256 public defaultAccessFee = 100000;  // 0.1 USDC (6 decimals)
+    uint256 public apiCallCost = 10000;        // 0.01 USDC per API call
+
     // ============ Events ============
 
     event TaskPosted(
@@ -82,6 +92,32 @@ contract AgentMarketplace is ReentrancyGuard {
     event TaskCancelled(
         uint256 indexed taskId,
         address indexed poster
+    );
+
+    // ============ X402 Events ============
+
+    event BalanceDeposited(
+        address indexed agent,
+        uint256 amount,
+        uint256 newBalance
+    );
+
+    event BalanceWithdrawn(
+        address indexed agent,
+        uint256 amount,
+        uint256 newBalance
+    );
+
+    event AccessPurchased(
+        uint256 indexed taskId,
+        address indexed agent,
+        uint256 fee
+    );
+
+    event ApiCallCharged(
+        address indexed agent,
+        uint256 cost,
+        uint256 remainingBalance
     );
 
     // ============ Modifiers ============
@@ -275,6 +311,105 @@ contract AgentMarketplace is ReentrancyGuard {
         return task.status == TaskStatus.Open && task.deadline > block.timestamp;
     }
 
+    // ============ X402 Payment Functions ============
+
+    /**
+     * @notice Deposit USDC for micropayments (x402)
+     * @param amount Amount of USDC to deposit
+     */
+    function depositBalance(uint256 amount) external nonReentrant {
+        require(amount > 0, "Amount must be > 0");
+
+        require(
+            usdc.transferFrom(msg.sender, address(this), amount),
+            "Deposit failed"
+        );
+
+        agentBalances[msg.sender] += amount;
+
+        emit BalanceDeposited(msg.sender, amount, agentBalances[msg.sender]);
+    }
+
+    /**
+     * @notice Withdraw unused balance
+     * @param amount Amount to withdraw
+     */
+    function withdrawBalance(uint256 amount) external nonReentrant {
+        require(amount > 0, "Amount must be > 0");
+        require(agentBalances[msg.sender] >= amount, "Insufficient balance");
+
+        agentBalances[msg.sender] -= amount;
+
+        require(
+            usdc.transfer(msg.sender, amount),
+            "Withdrawal failed"
+        );
+
+        emit BalanceWithdrawn(msg.sender, amount, agentBalances[msg.sender]);
+    }
+
+    /**
+     * @notice Purchase access to premium task details
+     * @param taskId Task to access
+     */
+    function purchaseTaskAccess(uint256 taskId) external nonReentrant {
+        require(tasks[taskId].id != 0, "Task not found");
+        require(!hasAccessToTask[taskId][msg.sender], "Already has access");
+
+        uint256 fee = taskAccessFee[taskId] > 0 ? taskAccessFee[taskId] : defaultAccessFee;
+        require(agentBalances[msg.sender] >= fee, "Insufficient balance");
+
+        agentBalances[msg.sender] -= fee;
+        agentBalances[owner] += fee; // Fee goes to platform
+
+        hasAccessToTask[taskId][msg.sender] = true;
+
+        emit AccessPurchased(taskId, msg.sender, fee);
+    }
+
+    /**
+     * @notice Charge agent for API call (called by trusted backend)
+     * @param agent Agent to charge
+     * @param cost Cost of the API call
+     */
+    function chargeApiCall(address agent, uint256 cost) external onlyOwner {
+        require(agentBalances[agent] >= cost, "Insufficient balance");
+
+        agentBalances[agent] -= cost;
+        agentBalances[owner] += cost;
+        apiCallCount[agent]++;
+
+        emit ApiCallCharged(agent, cost, agentBalances[agent]);
+    }
+
+    /**
+     * @notice Set custom access fee for a task
+     * @param taskId Task ID
+     * @param fee Access fee (0 = use default)
+     */
+    function setTaskAccessFee(uint256 taskId, uint256 fee) external onlyPoster(taskId) {
+        taskAccessFee[taskId] = fee;
+    }
+
+    /**
+     * @notice Check if agent has access to task
+     */
+    function checkTaskAccess(uint256 taskId, address agent) external view returns (bool) {
+        // Poster always has access
+        if (tasks[taskId].poster == agent) return true;
+        // Assigned agent has access
+        if (tasks[taskId].assignedTo == agent) return true;
+        // Check if purchased access
+        return hasAccessToTask[taskId][agent];
+    }
+
+    /**
+     * @notice Get agent balance
+     */
+    function getBalance(address agent) external view returns (uint256) {
+        return agentBalances[agent];
+    }
+
     // ============ Admin Functions ============
 
     /**
@@ -292,5 +427,19 @@ contract AgentMarketplace is ReentrancyGuard {
     function transferOwnership(address newOwner) external onlyOwner {
         require(newOwner != address(0), "Invalid address");
         owner = newOwner;
+    }
+
+    /**
+     * @notice Update default access fee
+     */
+    function updateDefaultAccessFee(uint256 newFee) external onlyOwner {
+        defaultAccessFee = newFee;
+    }
+
+    /**
+     * @notice Update API call cost
+     */
+    function updateApiCallCost(uint256 newCost) external onlyOwner {
+        apiCallCost = newCost;
     }
 }
