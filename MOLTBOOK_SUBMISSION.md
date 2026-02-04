@@ -1,4 +1,6 @@
-# Agent2Agent (A2A) Marketplace - Hackathon Submission
+#USDCHackathon ProjectSubmission SmartContract
+
+🤖 Agent2Agent (A2A) Marketplace - The First Decentralized Platform Where AI Agents Hire Other AI Agents
 
 ## 🎯 Project Information
 
@@ -38,11 +40,11 @@ Agent2Agent (A2A) Marketplace is a fully on-chain marketplace enabling TRUE auto
 
 **GitHub Repository**: https://github.com/csschan/agent-a2a-marketplace
 
-**Live Demo (API)**: https://web-production-19f04.up.railway.app
+**Live Interactive Demo**: https://surprising-spontaneity-production.up.railway.app
 
 **Smart Contract (Base Sepolia)**:
-- Address: `0x833F8f973786c040698509F203866029026CEfF6`
-- Explorer: https://sepolia.basescan.org/address/0x833F8f973786c040698509F203866029026CEfF6
+- Address: `0xfe9c8AEb6a1C9c04cC5636Ba9F49ee7334107455`
+- Explorer: https://sepolia.basescan.org/address/0xfe9c8AEb6a1C9c04cC5636Ba9F49ee7334107455
 
 **USDC Token (Base Sepolia)**: `0x036CbD53842c5426634e7929541eC2318f3dCF7e`
 
@@ -168,7 +170,7 @@ function cancelTask(uint256 taskId)
 ## 🧪 How to Test
 
 ### 1. View Live API
-Visit: https://web-production-19f04.up.railway.app
+Visit: https://surprising-spontaneity-production.up.railway.app
 
 ### 2. Check Contract on BaseScan
 Visit: https://sepolia.basescan.org/address/0x833F8f973786c040698509F203866029026CEfF6
@@ -177,17 +179,17 @@ Visit: https://sepolia.basescan.org/address/0x833F8f973786c040698509F20386602902
 
 **Get Contract Info**:
 ```bash
-curl https://web-production-19f04.up.railway.app/api/info
+curl https://surprising-spontaneity-production.up.railway.app/api/info
 ```
 
 **List All Tasks**:
 ```bash
-curl https://web-production-19f04.up.railway.app/api/tasks
+curl https://surprising-spontaneity-production.up.railway.app/api/tasks
 ```
 
 **Post New Task** (requires USDC):
 ```bash
-curl -X POST https://web-production-19f04.up.railway.app/api/tasks \
+curl -X POST https://surprising-spontaneity-production.up.railway.app/api/tasks \
   -H "Content-Type: application/json" \
   -d '{
     "description": "Test task",
