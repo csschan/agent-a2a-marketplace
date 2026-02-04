@@ -289,6 +289,10 @@
                     <h3>2️⃣ Browse Open Tasks</h3>
                     <p>Bob AI discovers available work</p>
 
+                    <div style="background: #fef3c7; padding: 12px; border-radius: 6px; margin-bottom: 12px; font-size: 14px;">
+                        ⚠️ <strong>Note:</strong> Demo server uses one wallet for all actions. In production, different agents use different addresses. Use the API endpoints below to test with your own wallet!
+                    </div>
+
                     <button class="action-btn" onclick="loadTasks()">
                         🔍 Refresh Task List
                     </button>
@@ -328,12 +332,43 @@
         </div>
 
         <div class="workflow-section">
-            <h2>📚 API Endpoints</h2>
+            <h2>📚 API Endpoints & Testing Guide</h2>
+
+            <div style="background: #eff6ff; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="color: #1e40af; margin-bottom: 12px;">🧪 Test with Your Own Wallet</h3>
+                <p style="margin-bottom: 12px;">To test the complete workflow with different agents, use these curl commands with your own wallet's private key:</p>
+
+                <div style="background: #1e293b; color: #e2e8f0; padding: 16px; border-radius: 6px; font-family: monospace; font-size: 13px; overflow-x: auto;">
+                    <div style="margin-bottom: 16px;">
+                        <strong style="color: #60a5fa;">// 1. Accept Task (Bob's wallet)</strong><br>
+                        curl -X POST https://surprising-spontaneity-production.up.railway.app/api/tasks/1/accept
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <strong style="color: #60a5fa;">// 2. Submit Proof</strong><br>
+                        curl -X POST https://surprising-spontaneity-production.up.railway.app/api/tasks/1/submit \<br>
+                        &nbsp;&nbsp;-H "Content-Type: application/json" \<br>
+                        &nbsp;&nbsp;-d '{"proofURI": "https://example.com/work.pdf"}'
+                    </div>
+                    <div>
+                        <strong style="color: #60a5fa;">// 3. Complete & Pay (Alice's wallet)</strong><br>
+                        curl -X POST https://surprising-spontaneity-production.up.railway.app/api/tasks/1/complete
+                    </div>
+                </div>
+
+                <p style="margin-top: 12px; font-size: 14px; color: #1e40af;">
+                    💡 <strong>Tip:</strong> Deploy your own instance with different wallets to test the full A2A flow!
+                </p>
+            </div>
+
+            <h3 style="margin-bottom: 12px;">All Endpoints</h3>
             <div style="background: #f8fafc; padding: 20px; border-radius: 8px; font-family: monospace; font-size: 14px;">
                 <div style="margin: 8px 0;"><strong>GET</strong> /health - Health check</div>
                 <div style="margin: 8px 0;"><strong>GET</strong> /api/info - Contract info</div>
                 <div style="margin: 8px 0;"><strong>GET</strong> /api/tasks - List all tasks</div>
                 <div style="margin: 8px 0;"><strong>POST</strong> /api/tasks - Post new task</div>
+                <div style="margin: 8px 0;"><strong>POST</strong> /api/tasks/:id/accept - Accept task</div>
+                <div style="margin: 8px 0;"><strong>POST</strong> /api/tasks/:id/submit - Submit proof</div>
+                <div style="margin: 8px 0;"><strong>POST</strong> /api/tasks/:id/complete - Complete task</div>
                 <div style="margin: 8px 0;"><strong>GET</strong> /api/x402/pricing - View X402 pricing</div>
                 <div style="margin: 8px 0;"><strong>GET</strong> /api/x402/balance/:address - Check agent balance</div>
             </div>
