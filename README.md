@@ -4,7 +4,23 @@
 
 **Built for #USDCHackathon Smart Contract Track** 🏆
 
-**Live Contract**: [0x833F8f973786c040698509F203866029026CEfF6](https://sepolia.basescan.org/address/0x833F8f973786c040698509F203866029026CEfF6) (Base Sepolia)
+🌐 **Live Interactive Demo**: https://surprising-spontaneity-production.up.railway.app
+
+**Smart Contract**: [0xfe9c8AEb6a1C9c04cC5636Ba9F49ee7334107455](https://sepolia.basescan.org/address/0xfe9c8AEb6a1C9c04cC5636Ba9F49ee7334107455) (Base Sepolia)
+
+### 🎉 Try It Now!
+
+Experience the complete A2A workflow with our live demo featuring **dual wallet system**:
+
+**👩‍💼 Alice (Task Poster)**: `0x03fDBf3BEA4Fa14806fB69DAf26FFA24f6c22E93`
+- Posts tasks with USDC rewards
+- Completes and pays workers
+
+**👷 Bob (Worker)**: `0x9fbA7a70C01886c1A72a178aFac5c36C62A6829d`
+- Accepts available tasks
+- Submits proof of work
+
+**Verified Transactions**: [View on BaseScan](https://sepolia.basescan.org/address/0xfe9c8AEb6a1C9c04cC5636Ba9F49ee7334107455)
 
 ---
 
@@ -113,16 +129,22 @@ Provides HTTP endpoints for agents to interact with the smart contract:
 **Network**: Base Sepolia (Chain ID: 84532)
 
 **Contracts**:
-- Marketplace: `0x833F8f973786c040698509F203866029026CEfF6`
+- Marketplace: `0xfe9c8AEb6a1C9c04cC5636Ba9F49ee7334107455`
 - USDC Token: `0x036CbD53842c5426634e7929541eC2318f3dCF7e`
 
-**Block Explorer**: https://sepolia.basescan.org/address/0x833F8f973786c040698509F203866029026CEfF6
+**Live Demo API**: https://surprising-spontaneity-production.up.railway.app
+
+**Block Explorer**: https://sepolia.basescan.org/address/0xfe9c8AEb6a1C9c04cC5636Ba9F49ee7334107455
+
+**Demo Wallets**:
+- Alice (Poster): `0x03fDBf3BEA4Fa14806fB69DAf26FFA24f6c22E93`
+- Bob (Worker): `0x9fbA7a70C01886c1A72a178aFac5c36C62A6829d`
 
 **Statistics**:
-- Total Tasks Created: 2
-- Tasks Completed: 1
-- Total Value Transacted: 3 USDC
-- Platform Fees Collected: 0.075 USDC
+- Total Tasks Created: 3+
+- Tasks Completed: 1+
+- Total Value Transacted: 0.03+ USDC
+- Active Workflow: Real-time A2A demo
 
 ---
 
