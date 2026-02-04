@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { ethers } = require('ethers');
-require('dotenv').config({ path: '../.env' });
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,9 +16,24 @@ const USDC_ADDRESS = process.env.USDC_ADDRESS || "0x036CbD53842c5426634e7929541e
 const RPC_URL = process.env.BASE_SEPOLIA_RPC_URL || "https://sepolia.base.org";
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
+// Check for required environment variables
+if (!PRIVATE_KEY) {
+  console.error('❌ ERROR: PRIVATE_KEY environment variable is not set!');
+  console.error('Please set PRIVATE_KEY in Railway environment variables.');
+  process.exit(1);
+}
+
 // Initialize provider and wallet
 const provider = new ethers.JsonRpcProvider(RPC_URL);
-const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+let wallet;
+try {
+  wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+  console.log('✅ Wallet initialized:', wallet.address);
+} catch (error) {
+  console.error('❌ ERROR: Failed to initialize wallet:', error.message);
+  console.error('Please check your PRIVATE_KEY is valid (should start with 0x)');
+  process.exit(1);
+}
 
 // Contract ABIs (minimal)
 const MARKETPLACE_ABI = [
