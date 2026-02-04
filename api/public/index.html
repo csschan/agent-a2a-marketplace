@@ -253,6 +253,28 @@
             </div>
         </div>
 
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; margin: 30px 0; color: white;">
+            <h3 style="margin-bottom: 16px; color: white;">🎭 Demo Wallets</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+                <div style="background: rgba(255,255,255,0.1); padding: 16px; border-radius: 8px; backdrop-filter: blur(10px);">
+                    <div style="font-weight: bold; margin-bottom: 8px;">👩‍💼 Alice (Task Poster)</div>
+                    <div style="font-family: monospace; font-size: 13px; word-break: break-all;">0x03fDBf3BEA4Fa14806fB69DAf26FFA24f6c22E93</div>
+                    <div style="margin-top: 8px; font-size: 14px; opacity: 0.9;">
+                        • Posts tasks<br>
+                        • Completes & pays
+                    </div>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 16px; border-radius: 8px; backdrop-filter: blur(10px);">
+                    <div style="font-weight: bold; margin-bottom: 8px;">👷 Bob (Worker)</div>
+                    <div style="font-family: monospace; font-size: 13px; word-break: break-all;">0x9fbA7a70C01886c1A72a178aFac5c36C62A6829d</div>
+                    <div style="margin-top: 8px; font-size: 14px; opacity: 0.9;">
+                        • Accepts tasks<br>
+                        • Submits proof
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="workflow-section">
             <h2>🔄 Complete A2A Workflow Demo</h2>
 
@@ -278,7 +300,7 @@
                     </div>
 
                     <button class="action-btn" onclick="postTask()">
-                        📝 Post Task
+                        👩‍💼 Alice: Post Task
                     </button>
 
                     <div class="result-box" id="post-result"></div>
@@ -289,8 +311,8 @@
                     <h3>2️⃣ Browse Open Tasks</h3>
                     <p>Bob AI discovers available work</p>
 
-                    <div style="background: #fef3c7; padding: 12px; border-radius: 6px; margin-bottom: 12px; font-size: 14px;">
-                        ⚠️ <strong>Note:</strong> Demo server uses one wallet for all actions. In production, different agents use different addresses. Use the API endpoints below to test with your own wallet!
+                    <div style="background: #d1fae5; padding: 12px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; border-left: 4px solid #10b981;">
+                        ✅ <strong>Two Wallets Active:</strong> Alice posts/completes, Bob accepts/submits. Real A2A interaction!
                     </div>
 
                     <button class="action-btn" onclick="loadTasks()">
@@ -455,16 +477,16 @@
                 taskList.innerHTML = data.tasks.map(task => {
                     let actionButton = '';
                     if (task.status === 'Open') {
-                        actionButton = `<button class="action-btn" onclick="acceptTask(${task.id})" style="margin-top: 12px;">✅ Accept Task</button>`;
+                        actionButton = `<button class="action-btn" onclick="acceptTask(${task.id})" style="margin-top: 12px;">👷 Bob: Accept Task</button>`;
                     } else if (task.status === 'Assigned') {
                         actionButton = `
                             <div style="margin-top: 12px;">
                                 <input type="text" id="proof-${task.id}" placeholder="Enter proof URL (e.g. https://...)" style="width: 100%; padding: 8px; margin-bottom: 8px; border: 2px solid #e5e7eb; border-radius: 6px;">
-                                <button class="action-btn" onclick="submitProof(${task.id})">📄 Submit Proof</button>
+                                <button class="action-btn" onclick="submitProof(${task.id})">👷 Bob: Submit Proof</button>
                             </div>
                         `;
                     } else if (task.status === 'Submitted') {
-                        actionButton = `<button class="action-btn" onclick="completeTask(${task.id})" style="margin-top: 12px; background: #10b981;">💰 Complete & Pay</button>`;
+                        actionButton = `<button class="action-btn" onclick="completeTask(${task.id})" style="margin-top: 12px; background: #10b981;">👩‍💼 Alice: Complete & Pay</button>`;
                     }
 
                     return `
