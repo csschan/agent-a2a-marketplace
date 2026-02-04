@@ -34,6 +34,7 @@ const MARKETPLACE_ADDRESS = process.env.MARKETPLACE_ADDRESS || "0x833F8f973786c0
 const USDC_ADDRESS = process.env.USDC_ADDRESS || "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
 const RPC_URL = process.env.BASE_SEPOLIA_RPC_URL || "https://sepolia.base.org";
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const PRIVATE_KEY_BOB = process.env.PRIVATE_KEY_BOB;
 
 // Check for required environment variables
 if (!PRIVATE_KEY) {
@@ -42,17 +43,31 @@ if (!PRIVATE_KEY) {
   process.exit(1);
 }
 
-// Initialize provider and wallet
+// Initialize provider and wallets
 const provider = new ethers.JsonRpcProvider(RPC_URL);
-let wallet;
+let walletAlice, walletBob;
+
 try {
-  wallet = new ethers.Wallet(PRIVATE_KEY, provider);
-  console.log('✅ Wallet initialized:', wallet.address);
+  // Alice's wallet (for posting and completing tasks)
+  walletAlice = new ethers.Wallet(PRIVATE_KEY, provider);
+  console.log('✅ Alice wallet initialized:', walletAlice.address);
+
+  // Bob's wallet (for accepting and submitting tasks)
+  if (PRIVATE_KEY_BOB) {
+    walletBob = new ethers.Wallet(PRIVATE_KEY_BOB, provider);
+    console.log('✅ Bob wallet initialized:', walletBob.address);
+  } else {
+    console.log('⚠️  Bob wallet not configured, using Alice for all operations');
+    walletBob = walletAlice;
+  }
 } catch (error) {
-  console.error('❌ ERROR: Failed to initialize wallet:', error.message);
+  console.error('❌ ERROR: Failed to initialize wallets:', error.message);
   console.error('Please check your PRIVATE_KEY is valid (should start with 0x)');
   process.exit(1);
 }
+
+// Keep backward compatibility
+const wallet = walletAlice;
 
 // Contract ABIs (with x402 support)
 const MARKETPLACE_ABI = [
@@ -93,11 +108,19 @@ const USDC_ABI = [
 ];
 
 // Contract instances
-let marketplace, usdc;
+let marketplace, usdc, marketplaceBob, usdcBob;
 try {
-  marketplace = new ethers.Contract(MARKETPLACE_ADDRESS, MARKETPLACE_ABI, wallet);
-  usdc = new ethers.Contract(USDC_ADDRESS, USDC_ABI, wallet);
+  // Alice's contract instances (for posting and completing)
+  marketplace = new ethers.Contract(MARKETPLACE_ADDRESS, MARKETPLACE_ABI, walletAlice);
+  usdc = new ethers.Contract(USDC_ADDRESS, USDC_ABI, walletAlice);
+
+  // Bob's contract instances (for accepting and submitting)
+  marketplaceBob = new ethers.Contract(MARKETPLACE_ADDRESS, MARKETPLACE_ABI, walletBob);
+  usdcBob = new ethers.Contract(USDC_ADDRESS, USDC_ABI, walletBob);
+
   console.log('✅ Contracts initialized successfully');
+  console.log('   📝 Alice (poster):', walletAlice.address);
+  console.log('   👷 Bob (worker):', walletBob.address);
 } catch (error) {
   console.error('❌ Contract initialization failed:', error.message);
   process.exit(1);
@@ -511,26 +534,31 @@ app.post('/api/tasks', async (req, res) => {
   }
 });
 
-// Accept a task
+// Accept a task (Bob accepts)
 app.post('/api/tasks/:id/accept', async (req, res) => {
   try {
     const taskId = parseInt(req.params.id);
 
-    const tx = await marketplace.acceptTask(taskId);
+    console.log(`👷 Bob accepting task ${taskId}...`);
+    const tx = await marketplaceBob.acceptTask(taskId);
+    console.log('⏳ Waiting for confirmation...');
     const receipt = await tx.wait();
+    console.log('✅ Task accepted by Bob');
 
     res.json({
       success: true,
       taskId: taskId,
+      worker: walletBob.address,
       transactionHash: tx.hash,
       explorerUrl: `https://sepolia.basescan.org/tx/${tx.hash}`
     });
   } catch (error) {
+    console.error('❌ Accept task failed:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Submit proof
+// Submit proof (Bob submits)
 app.post('/api/tasks/:id/submit', async (req, res) => {
   try {
     const taskId = parseInt(req.params.id);
@@ -540,17 +568,22 @@ app.post('/api/tasks/:id/submit', async (req, res) => {
       return res.status(400).json({ error: 'Missing required field: proofURI' });
     }
 
-    const tx = await marketplace.submitProof(taskId, proofURI);
+    console.log(`👷 Bob submitting proof for task ${taskId}...`);
+    const tx = await marketplaceBob.submitProof(taskId, proofURI);
+    console.log('⏳ Waiting for confirmation...');
     const receipt = await tx.wait();
+    console.log('✅ Proof submitted by Bob');
 
     res.json({
       success: true,
       taskId: taskId,
       proofURI: proofURI,
+      worker: walletBob.address,
       transactionHash: tx.hash,
       explorerUrl: `https://sepolia.basescan.org/tx/${tx.hash}`
     });
   } catch (error) {
+    console.error('❌ Submit proof failed:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
