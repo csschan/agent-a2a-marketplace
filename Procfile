@@ -1,1 +1,1 @@
-web: cd api && node server.js
+web: cd api && node simple-server.js
