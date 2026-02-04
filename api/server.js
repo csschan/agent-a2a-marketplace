@@ -474,15 +474,31 @@ app.post('/api/tasks', async (req, res) => {
     console.log('✅ Task posted');
 
     // Get task ID from event
-    const event = receipt.logs.find(log => {
-      try {
-        return marketplace.interface.parseLog(log).name === "TaskPosted";
-      } catch {
-        return false;
-      }
-    });
+    let taskId;
+    try {
+      const event = receipt.logs.find(log => {
+        try {
+          const parsed = marketplace.interface.parseLog(log);
+          return parsed && parsed.name === "TaskPosted";
+        } catch {
+          return false;
+        }
+      });
 
-    const taskId = marketplace.interface.parseLog(event).args.taskId;
+      if (event) {
+        const parsed = marketplace.interface.parseLog(event);
+        taskId = parsed.args.taskId;
+      } else {
+        // If event not found, get the next task ID from counter
+        const counter = await marketplace.taskCounter();
+        taskId = counter;
+      }
+    } catch (error) {
+      console.error('Error parsing event:', error);
+      // Fallback to task counter
+      const counter = await marketplace.taskCounter();
+      taskId = counter;
+    }
 
     res.json({
       success: true,
