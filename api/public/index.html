@@ -417,7 +417,22 @@
                     return;
                 }
 
-                taskList.innerHTML = data.tasks.map(task => `
+                taskList.innerHTML = data.tasks.map(task => {
+                    let actionButton = '';
+                    if (task.status === 'Open') {
+                        actionButton = `<button class="action-btn" onclick="acceptTask(${task.id})" style="margin-top: 12px;">✅ Accept Task</button>`;
+                    } else if (task.status === 'Assigned') {
+                        actionButton = `
+                            <div style="margin-top: 12px;">
+                                <input type="text" id="proof-${task.id}" placeholder="Enter proof URL (e.g. https://...)" style="width: 100%; padding: 8px; margin-bottom: 8px; border: 2px solid #e5e7eb; border-radius: 6px;">
+                                <button class="action-btn" onclick="submitProof(${task.id})">📄 Submit Proof</button>
+                            </div>
+                        `;
+                    } else if (task.status === 'Submitted') {
+                        actionButton = `<button class="action-btn" onclick="completeTask(${task.id})" style="margin-top: 12px; background: #10b981;">💰 Complete & Pay</button>`;
+                    }
+
+                    return `
                     <div class="task-item">
                         <h4>Task #${task.id}</h4>
                         <p>${task.description}</p>
@@ -428,8 +443,11 @@
                         <div class="task-meta">
                             <span><strong>Deadline:</strong> ${new Date(task.deadline).toLocaleString()}</span>
                         </div>
+                        ${actionButton}
+                        <div class="result-box" id="task-result-${task.id}"></div>
                     </div>
-                `).join('');
+                    `;
+                }).join('');
 
                 // Update total tasks
                 document.getElementById('total-tasks').textContent = data.total;
@@ -485,6 +503,103 @@
                     📊 API Calls: ${data.api_call_count}<br>
                     <small>Address: ${address.slice(0, 10)}...${address.slice(-8)}</small>
                 `;
+            } catch (error) {
+                resultBox.className = 'result-box show error';
+                resultBox.textContent = '❌ ' + error.message;
+            }
+        }
+
+        // Accept a task
+        async function acceptTask(taskId) {
+            const resultBox = document.getElementById(`task-result-${taskId}`);
+            resultBox.className = 'result-box show';
+            resultBox.textContent = 'Accepting task...';
+
+            try {
+                const response = await fetch(`/api/tasks/${taskId}/accept`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    resultBox.innerHTML = `
+                        ✅ Task accepted!<br>
+                        <a href="${data.explorerUrl}" target="_blank">View transaction →</a>
+                    `;
+                    setTimeout(() => loadTasks(), 2000);
+                } else {
+                    throw new Error(data.error || 'Failed to accept task');
+                }
+            } catch (error) {
+                resultBox.className = 'result-box show error';
+                resultBox.textContent = '❌ ' + error.message;
+            }
+        }
+
+        // Submit proof for a task
+        async function submitProof(taskId) {
+            const proofInput = document.getElementById(`proof-${taskId}`);
+            const proofURI = proofInput.value;
+            const resultBox = document.getElementById(`task-result-${taskId}`);
+
+            if (!proofURI) {
+                resultBox.className = 'result-box show error';
+                resultBox.textContent = '❌ Please enter a proof URL';
+                return;
+            }
+
+            resultBox.className = 'result-box show';
+            resultBox.textContent = 'Submitting proof...';
+
+            try {
+                const response = await fetch(`/api/tasks/${taskId}/submit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ proofURI })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    resultBox.innerHTML = `
+                        ✅ Proof submitted!<br>
+                        <a href="${data.explorerUrl}" target="_blank">View transaction →</a>
+                    `;
+                    setTimeout(() => loadTasks(), 2000);
+                } else {
+                    throw new Error(data.error || 'Failed to submit proof');
+                }
+            } catch (error) {
+                resultBox.className = 'result-box show error';
+                resultBox.textContent = '❌ ' + error.message;
+            }
+        }
+
+        // Complete a task and release payment
+        async function completeTask(taskId) {
+            const resultBox = document.getElementById(`task-result-${taskId}`);
+
+            if (!confirm('Are you sure you want to complete this task and release payment?')) {
+                return;
+            }
+
+            resultBox.className = 'result-box show';
+            resultBox.textContent = 'Completing task and releasing payment...';
+
+            try {
+                const response = await fetch(`/api/tasks/${taskId}/complete`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    resultBox.innerHTML = `
+                        ✅ Task completed! Payment released!<br>
+                        <a href="${data.explorerUrl}" target="_blank">View transaction →</a>
+                    `;
+                    setTimeout(() => loadTasks(), 2000);
+                } else {
+                    throw new Error(data.error || 'Failed to complete task');
+                }
             } catch (error) {
                 resultBox.className = 'result-box show error';
                 resultBox.textContent = '❌ ' + error.message;
